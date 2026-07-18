@@ -55,8 +55,27 @@ const SETTING_DEFAULTS: StoreSettings = {
   paymentMethodsEnabled: { COD: true },
 };
 
+/**
+ * Static pages (layout, home, cart, checkout, contact) call these at BUILD
+ * time. A transient DB hiccup must not kill the whole deploy — fall back to
+ * safe defaults and let ISR (revalidate 60) fill in real data right after.
+ * Dynamic pages (shop/product/order) intentionally stay unwrapped so real
+ * errors surface at request time.
+ */
+async function safe<T>(promise: Promise<T>, fallback: T): Promise<T> {
+  try {
+    return await promise;
+  } catch (e) {
+    console.error(
+      "[queries] falling back, DB query failed:",
+      e instanceof Error ? e.message : e,
+    );
+    return fallback;
+  }
+}
+
 export async function getSettings(): Promise<StoreSettings> {
-  const rows = await prisma.setting.findMany();
+  const rows = await safe(prisma.setting.findMany(), []);
   const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
   return { ...SETTING_DEFAULTS, ...map } as StoreSettings;
 }
@@ -64,7 +83,10 @@ export async function getSettings(): Promise<StoreSettings> {
 // ---------- Catalog ----------
 
 export function getCategories() {
-  return prisma.category.findMany({ orderBy: { sortOrder: "asc" } });
+  return safe(
+    prisma.category.findMany({ orderBy: { sortOrder: "asc" } }),
+    [],
+  );
 }
 
 export function getCategoryBySlug(slug: string) {
@@ -72,39 +94,51 @@ export function getCategoryBySlug(slug: string) {
 }
 
 export function getHeroSlides() {
-  return prisma.heroSlide.findMany({
-    where: { active: true },
-    orderBy: { sortOrder: "asc" },
-  });
+  return safe(
+    prisma.heroSlide.findMany({
+      where: { active: true },
+      orderBy: { sortOrder: "asc" },
+    }),
+    [],
+  );
 }
 
 export async function getFeaturedProducts(limit = 8) {
-  const products = await prisma.product.findMany({
-    where: { status: "ACTIVE", featured: true },
-    include: { variants: true },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
+  const products = await safe(
+    prisma.product.findMany({
+      where: { status: "ACTIVE", featured: true },
+      include: { variants: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    }),
+    [],
+  );
   return products.map(toProductCard);
 }
 
 export async function getNewArrivals(limit = 8) {
-  const products = await prisma.product.findMany({
-    where: { status: "ACTIVE" },
-    include: { variants: true },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
+  const products = await safe(
+    prisma.product.findMany({
+      where: { status: "ACTIVE" },
+      include: { variants: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    }),
+    [],
+  );
   return products.map(toProductCard);
 }
 
 export async function getSaleProducts(limit = 8) {
-  const products = await prisma.product.findMany({
-    where: { status: "ACTIVE", compareAtPrice: { not: null } },
-    include: { variants: true },
-    orderBy: { createdAt: "desc" },
-    take: limit,
-  });
+  const products = await safe(
+    prisma.product.findMany({
+      where: { status: "ACTIVE", compareAtPrice: { not: null } },
+      include: { variants: true },
+      orderBy: { createdAt: "desc" },
+      take: limit,
+    }),
+    [],
+  );
   return products.map(toProductCard);
 }
 
