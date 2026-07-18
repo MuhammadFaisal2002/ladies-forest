@@ -139,6 +139,15 @@ export async function getRelatedProducts(
   return products.map(toProductCard);
 }
 
+// ---------- Orders ----------
+
+export function getOrderByNumber(orderNumber: string) {
+  return prisma.order.findUnique({
+    where: { orderNumber },
+    include: { items: true },
+  });
+}
+
 // ---------- Shop listing with filters ----------
 
 export type ShopFilters = {

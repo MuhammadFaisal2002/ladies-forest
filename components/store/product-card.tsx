@@ -25,8 +25,8 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
       className={cn("group block", className)}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
-        {/* Hover behaviour: swap to the product's second photo when there is
-            one; zoom is only the fallback for single-image products. */}
+        {/* Hover behaviour: pure crossfade to the product's second photo —
+            no zoom/scale anywhere (owner's call, 2026-07-18). */}
         {product.image && (
           <Image
             src={product.image}
@@ -35,10 +35,8 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
             priority={priority}
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className={cn(
-              "object-cover transition-opacity duration-500 ease-out",
-              product.hoverImage
-                ? "group-hover:opacity-0"
-                : "transition-transform group-hover:scale-[1.04]",
+              "object-cover transition-opacity duration-300 ease-out",
+              product.hoverImage && "group-hover:opacity-0",
             )}
           />
         )}
@@ -48,7 +46,7 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
             alt=""
             fill
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="scale-[1.06] object-cover opacity-0 transition-all duration-500 ease-out group-hover:scale-100 group-hover:opacity-100"
+            className="object-cover opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
           />
         )}
         {off > 0 && !product.outOfStock && (
