@@ -21,13 +21,12 @@ import {
   getProductBySlug,
   getRelatedProducts,
   getSettings,
+  isSizeChartImage,
 } from "@/lib/queries";
 
 export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
-
-const isSizeChart = (src: string) => /sizechart/i.test(src);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -52,8 +51,10 @@ export default async function ProductPage({ params }: Props) {
     getSettings(),
   ]);
 
-  const galleryImages = product.images.filter((src) => !isSizeChart(src));
-  const sizeChartImage = product.images.find(isSizeChart) ?? null;
+  const galleryImages = product.images.filter(
+    (src) => !isSizeChartImage(src),
+  );
+  const sizeChartImage = product.images.find(isSizeChartImage) ?? null;
 
   const info: ProductInfoData = {
     id: product.id,

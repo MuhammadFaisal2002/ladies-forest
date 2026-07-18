@@ -1,11 +1,14 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { formatPKR, discountPercent } from "@/lib/format";
 import type { ProductCardData } from "@/lib/queries";
 import { cn } from "@/lib/utils";
+
+const CYCLE_MS = 2000;
 
 type ProductCardProps = {
   product: ProductCardData;
@@ -14,7 +17,43 @@ type ProductCardProps = {
   priority?: boolean;
 };
 
+/**
+ * Hover behaviour (owner's call, 2026-07-18): while the cursor stays on the
+ * card the photos keep cycling — next image immediately on hover, then the
+ * next every 2s, looping. Leaving resets to the first photo. Never zooms.
+ */
 export function ProductCard({ product, className, priority }: ProductCardProps) {
+  const images = product.images;
+  const [active, setActive] = useState(0);
+  // Extra photos mount only after the first hover, so grids don't preload
+  // every image of every product.
+  const [warm, setWarm] = useState(false);
+  const timer = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stop = () => {
+    if (timer.current) {
+      clearInterval(timer.current);
+      timer.current = null;
+    }
+  };
+  useEffect(() => stop, []);
+
+  const handleEnter = () => {
+    if (images.length < 2) return;
+    setWarm(true);
+    setActive(1);
+    stop();
+    timer.current = setInterval(
+      () => setActive((i) => (i + 1) % images.length),
+      CYCLE_MS,
+    );
+  };
+
+  const handleLeave = () => {
+    stop();
+    setActive(0);
+  };
+
   const off = product.compareAtPrice
     ? discountPercent(product.compareAtPrice, product.price)
     : 0;
@@ -23,39 +62,50 @@ export function ProductCard({ product, className, priority }: ProductCardProps) 
     <Link
       href={`/product/${product.slug}`}
       className={cn("group block", className)}
+      onMouseEnter={handleEnter}
+      onMouseLeave={handleLeave}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-muted">
-        {/* Hover behaviour: pure crossfade to the product's second photo —
-            no zoom/scale anywhere (owner's call, 2026-07-18). */}
-        {product.image && (
+        {(warm ? images : images.slice(0, 1)).map((src, i) => (
           <Image
-            src={product.image}
-            alt={product.title}
+            key={`${src}-${i}`}
+            src={src}
+            alt={i === 0 ? product.title : ""}
             fill
-            priority={priority}
+            priority={priority && i === 0}
             sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             className={cn(
-              "object-cover transition-opacity duration-300 ease-out",
-              product.hoverImage && "group-hover:opacity-0",
+              "object-cover transition-opacity duration-500 ease-out",
+              i === active ? "opacity-100" : "opacity-0",
             )}
           />
+        ))}
+
+        {/* Cycle position dots — visible only while hovering */}
+        {warm && images.length > 1 && (
+          <div
+            aria-hidden
+            className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+          >
+            {images.map((_, i) => (
+              <span
+                key={i}
+                className={cn(
+                  "size-1.5 rounded-full bg-white/50 transition-colors duration-200",
+                  i === active && "bg-white",
+                )}
+              />
+            ))}
+          </div>
         )}
-        {product.hoverImage && (
-          <Image
-            src={product.hoverImage}
-            alt=""
-            fill
-            sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-            className="object-cover opacity-0 transition-opacity duration-300 ease-out group-hover:opacity-100"
-          />
-        )}
+
         {off > 0 && !product.outOfStock && (
-          <Badge className="absolute left-2 top-2 bg-primary text-primary-foreground">
+          <Badge className="absolute left-2 top-2 z-10 bg-primary text-primary-foreground">
             -{off}%
           </Badge>
         )}
         {product.outOfStock && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/60">
+          <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/60">
             <span className="rounded-full bg-foreground px-3 py-1 text-xs font-medium uppercase tracking-wide text-background">
               Out of stock
             </span>

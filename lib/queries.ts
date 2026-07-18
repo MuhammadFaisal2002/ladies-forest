@@ -7,12 +7,15 @@ export type ProductCardData = {
   id: string;
   slug: string;
   title: string;
-  image: string | null;
-  hoverImage: string | null;
+  /** Gallery images (size charts excluded), capped for the hover cycle. */
+  images: string[];
   price: number;
   compareAtPrice: number | null;
   outOfStock: boolean;
 };
+
+/** Size-chart shots live in the same images array; exclude them from grids. */
+export const isSizeChartImage = (src: string) => /sizechart/i.test(src);
 
 type ProductWithVariants = Prisma.ProductGetPayload<{
   include: { variants: true };
@@ -23,8 +26,7 @@ export function toProductCard(p: ProductWithVariants): ProductCardData {
     id: p.id,
     slug: p.slug,
     title: p.title,
-    image: p.images[0] ?? null,
-    hoverImage: p.images[1] ?? null,
+    images: p.images.filter((src) => !isSizeChartImage(src)).slice(0, 5),
     price: p.basePrice,
     compareAtPrice: p.compareAtPrice,
     outOfStock: p.variants.length > 0 && p.variants.every((v) => v.stock <= 0),
