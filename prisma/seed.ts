@@ -295,22 +295,24 @@ async function main() {
   }
 
   console.log("Creating hero slides...");
+  // The store's real banners (downloaded from the live site into /public).
+  // Both artworks carry their own baked-in text, so no overlay headings.
   await prisma.heroSlide.createMany({
     data: [
       {
-        image: `${CDN}/IMG_5345.webp?v=1781476895`,
-        heading: "Comfort You Can Live In",
-        subheading: "Soft cotton bras designed for all-day ease — now 20% off",
-        ctaText: "Shop Bestsellers",
+        image: "/hero1.webp",
+        heading: null,
+        subheading: null,
+        ctaText: "Shop Now",
         ctaHref: "/shop",
         sortOrder: 0,
       },
       {
-        image: `${CDN}/1_8bfa436b-a4b6-419c-8a8b-bf963b4946d0.jpg?v=1778426695`,
-        heading: "Wire-Free. Worry-Free.",
-        subheading: "Non-padded comfort for long hours of wear",
-        ctaText: "Explore Collection",
-        ctaHref: "/category/bras",
+        image: "/hero2.webp",
+        heading: null,
+        subheading: null,
+        ctaText: "Shop Now",
+        ctaHref: "/shop",
         sortOrder: 1,
       },
     ],
