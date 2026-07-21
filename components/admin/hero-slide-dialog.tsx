@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ImageUploader } from "@/components/admin/image-uploader";
 import { deleteHeroSlide, upsertHeroSlide } from "@/lib/actions/admin/store";
 
 export type SlideData = {
@@ -84,12 +85,19 @@ export function HeroSlideDialog({
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-1.5">
-            <Label>Image URL *</Label>
-            <Input
-              value={form.image}
-              onChange={(e) => set("image", e.target.value)}
-              placeholder="/hero1.webp or https://..."
-            />
+            <Label>Image *</Label>
+            <div className="flex gap-2">
+              <Input
+                value={form.image}
+                onChange={(e) => set("image", e.target.value)}
+                placeholder="/hero1.webp or https://..."
+              />
+              <ImageUploader
+                multiple={false}
+                label="Upload"
+                onUploaded={(urls) => urls[0] && set("image", urls[0])}
+              />
+            </div>
             <p className="text-xs text-muted-foreground">
               Wide banner, ~1600×600 works best. Leave heading empty if the
               artwork already has text.

@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { ImageUploader } from "@/components/admin/image-uploader";
 import {
   deleteProduct,
   upsertProduct,
@@ -306,15 +307,22 @@ export function ProductForm({
         </Card>
 
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Images</CardTitle>
+            <ImageUploader
+              onUploaded={(urls) =>
+                setImagesText((prev) =>
+                  [prev.trim(), ...urls].filter(Boolean).join("\n"),
+                )
+              }
+            />
           </CardHeader>
           <CardContent className="space-y-3">
             <Textarea
               rows={4}
               value={imagesText}
               onChange={(e) => setImagesText(e.target.value)}
-              placeholder={"One image URL per line — first one is the main photo"}
+              placeholder={"Upload photos above, or paste one image URL per line — first one is the main photo"}
             />
             {images.length > 0 && (
               <div className="flex flex-wrap gap-2">

@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { ImageUploader } from "@/components/admin/image-uploader";
 import { deleteCategory, upsertCategory } from "@/lib/actions/admin/store";
 
 export type CategoryData = {
@@ -105,11 +106,18 @@ export function CategoryDialog({
             />
           </div>
           <div className="space-y-1.5">
-            <Label>Banner image URL (optional)</Label>
-            <Input
-              value={form.bannerImage}
-              onChange={(e) => set("bannerImage", e.target.value)}
-            />
+            <Label>Banner image (optional)</Label>
+            <div className="flex gap-2">
+              <Input
+                value={form.bannerImage}
+                onChange={(e) => set("bannerImage", e.target.value)}
+              />
+              <ImageUploader
+                multiple={false}
+                label="Upload"
+                onUploaded={(urls) => urls[0] && set("bannerImage", urls[0])}
+              />
+            </div>
           </div>
           <div className="space-y-1.5">
             <Label>Sort order</Label>
