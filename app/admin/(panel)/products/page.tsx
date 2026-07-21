@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PageHeader } from "@/components/admin/page-header";
+import { ProductDeleteButton } from "@/components/admin/product-delete-button";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { getAdminProducts } from "@/lib/admin-queries";
 import { formatPKR } from "@/lib/format";
@@ -41,6 +42,7 @@ export default async function AdminProductsPage() {
                 <TableHead>Price</TableHead>
                 <TableHead>Stock</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -94,6 +96,9 @@ export default async function AdminProductsPage() {
                     </TableCell>
                     <TableCell>
                       <StatusBadge value={p.status} />
+                    </TableCell>
+                    <TableCell>
+                      <ProductDeleteButton productId={p.id} title={p.title} />
                     </TableCell>
                   </TableRow>
                 );
