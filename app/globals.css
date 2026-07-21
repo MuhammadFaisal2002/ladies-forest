@@ -137,6 +137,22 @@
   --blush: oklch(0.26 0.025 355);
 }
 
+/* Invoice printing: only the #invoice area prints (admin order detail) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #invoice,
+  #invoice * {
+    visibility: visible;
+  }
+  #invoice {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
