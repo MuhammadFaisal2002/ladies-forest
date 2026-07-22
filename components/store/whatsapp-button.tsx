@@ -1,7 +1,9 @@
 "use client";
 
 export function WhatsAppButton({ number }: { number: string }) {
-  const digits = number.replace(/\D/g, "");
+  let digits = number.replace(/\D/g, "");
+  // wa.me needs the country code: 03XX... -> 923XX...
+  if (digits.startsWith("0")) digits = `92${digits.slice(1)}`;
   if (!digits) return null;
 
   return (

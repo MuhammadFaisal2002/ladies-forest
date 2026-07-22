@@ -119,6 +119,7 @@ export default async function ProductPage({ params }: Props) {
         <ProductInfo
           product={info}
           freeDeliveryThreshold={settings.freeDeliveryThreshold}
+          whatsappNumber={settings.whatsappNumber}
         />
       </div>
 

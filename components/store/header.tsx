@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Menu, Search, ShoppingBag, User, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +12,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Input } from "@/components/ui/input";
+import { SearchBox } from "@/components/store/search-box";
 import { useCartStore, cartCount } from "@/lib/cart-store";
 import { cn } from "@/lib/utils";
 
@@ -22,11 +22,9 @@ type HeaderProps = {
 };
 
 export function Header({ storeName, categories }: HeaderProps) {
-  const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [query, setQuery] = useState("");
   const [mobileOpen, setMobileOpen] = useState(false);
   const items = useCartStore((s) => s.items);
   const openMiniCart = useCartStore((s) => s.openMiniCart);
@@ -44,13 +42,6 @@ export function Header({ storeName, categories }: HeaderProps) {
     ...categories.map((c) => ({ label: c.name, href: `/category/${c.slug}` })),
     { label: "Contact", href: "/contact" },
   ];
-
-  const submitSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = query.trim();
-    setSearchOpen(false);
-    router.push(q ? `/shop?q=${encodeURIComponent(q)}` : "/shop");
-  };
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur-md">
@@ -119,26 +110,45 @@ export function Header({ storeName, categories }: HeaderProps) {
         </nav>
 
         <div className="ml-auto flex items-center gap-1">
-          {/* Search */}
+          {/* Search — inline on desktop, full-width bar below header on mobile */}
           {searchOpen ? (
-            <form onSubmit={submitSearch} className="flex items-center gap-1">
-              <Input
-                autoFocus
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search products..."
-                className="h-9 w-40 sm:w-56"
-              />
+            <>
+              <div className="hidden items-center gap-1 sm:flex">
+                <SearchBox onClose={() => setSearchOpen(false)} />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close search"
+                  onClick={() => setSearchOpen(false)}
+                >
+                  <X className="size-5" />
+                </Button>
+              </div>
+              <div className="absolute inset-x-0 top-full z-50 flex items-center gap-2 border-b bg-background p-3 shadow-sm sm:hidden">
+                <div className="relative flex-1">
+                  <SearchBox mobile onClose={() => setSearchOpen(false)} />
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Close search"
+                  onClick={() => setSearchOpen(false)}
+                >
+                  <X className="size-5" />
+                </Button>
+              </div>
               <Button
-                type="button"
                 variant="ghost"
                 size="icon"
                 aria-label="Close search"
+                className="sm:hidden"
                 onClick={() => setSearchOpen(false)}
               >
                 <X className="size-5" />
               </Button>
-            </form>
+            </>
           ) : (
             <Button
               variant="ghost"
