@@ -210,7 +210,7 @@ export function HeroSlider({ slides }: { slides: HeroSlideData[] }) {
       ref={containerRef}
       aria-roledescription="carousel"
       aria-label="Featured collections"
-      className="relative h-[56vw] max-h-[640px] min-h-[340px] w-full touch-pan-y overflow-hidden bg-forest"
+      className="relative h-[50vw] max-h-[620px] min-h-[240px] w-full touch-pan-y overflow-hidden bg-blush"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={handleMouseLeave}
       onMouseMove={handleMouseMove}
@@ -237,17 +237,27 @@ export function HeroSlider({ slides }: { slides: HeroSlideData[] }) {
             >
               <div
                 data-hero-image
-                className="absolute -inset-1 will-change-transform"
+                className="absolute inset-0 will-change-transform"
               >
+                {/* Blurred fill behind the banner so the FULL artwork is
+                    always visible (object-contain) with no cut corners,
+                    whatever the screen ratio. */}
+                <Image
+                  src={slide.image}
+                  alt=""
+                  aria-hidden
+                  fill
+                  priority={i === 0}
+                  sizes="100vw"
+                  className="scale-110 object-cover opacity-60 blur-2xl"
+                />
                 <Image
                   src={slide.image}
                   alt={slide.heading ?? "Ladies Forest"}
                   fill
                   priority={i === 0}
                   sizes="100vw"
-                  // object-left: banner artwork anchors its text on the left,
-                  // so crop from the right when the viewport is narrower.
-                  className="object-cover object-left"
+                  className="object-contain"
                 />
               </div>
               {/* Lighter wash when the banner artwork carries its own text */}

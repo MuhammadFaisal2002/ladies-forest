@@ -137,6 +137,28 @@
   --blush: oklch(0.26 0.025 355);
 }
 
+/* Admin UI: clearer font, larger text & controls (owner request) */
+.admin-ui {
+  font-family: var(--font-admin), var(--font-sans), sans-serif;
+  font-size: 0.9375rem; /* 15px base */
+}
+.admin-ui [data-slot="table"] {
+  font-size: 0.9375rem;
+}
+.admin-ui [data-slot="button"]:not([class*="size-"]) {
+  min-height: 2.5rem;
+  padding-inline: 1.1rem;
+  font-size: 0.9375rem;
+}
+.admin-ui nav a {
+  font-size: 0.9375rem;
+}
+.admin-ui input,
+.admin-ui textarea,
+.admin-ui [data-slot="select-trigger"] {
+  font-size: 0.9375rem;
+}
+
 /* Invoice printing: only the #invoice area prints (admin order detail) */
 @media print {
   body * {
