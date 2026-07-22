@@ -13,6 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { OrderActions } from "@/components/admin/order-actions";
+import { OrderWhatsApp } from "@/components/admin/order-whatsapp";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { getAdminOrder } from "@/lib/admin-queries";
 import { formatPKR } from "@/lib/format";
@@ -25,6 +26,23 @@ export default async function AdminOrderDetailPage({
   const { id } = await params;
   const order = await getAdminOrder(id);
   if (!order) notFound();
+
+  // Pre-written WhatsApp message to confirm the order with the customer
+  const firstName = order.shipName.trim().split(/\s+/)[0];
+  const confirmMessage = [
+    `Assalam o Alaikum ${firstName}! Ladies Forest se raabta kar rahe hain. 🌸`,
+    ``,
+    `Aap ka order *${order.orderNumber}* confirm karna hai:`,
+    ...order.items.map(
+      (i) =>
+        `• ${i.productTitle}${i.variantTitle && i.variantTitle !== "Default" ? ` (${i.variantTitle})` : ""} x ${i.quantity} — ${formatPKR(i.price * i.quantity)}`,
+    ),
+    ``,
+    `Total: *${formatPKR(order.grandTotal)}* (${order.paymentMethod})`,
+    `Address: ${order.shipAddress}, ${order.shipCity}`,
+    ``,
+    `Kya ye order confirm hai? Baraye meharbani *YES* reply kar dein. Shukriya!`,
+  ].join("\n");
 
   return (
     <>
@@ -164,6 +182,13 @@ export default async function AdminOrderDetailPage({
                 {order.shipAddress}, {order.shipCity}
                 {order.shipProvince ? `, ${order.shipProvince}` : ""}
               </p>
+              <div className="mt-4 print:hidden">
+                <OrderWhatsApp
+                  phone={order.shipPhone}
+                  message={confirmMessage}
+                  label="Confirm on WhatsApp"
+                />
+              </div>
             </CardContent>
           </Card>
         </div>

@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { OrderWhatsApp } from "@/components/admin/order-whatsapp";
 import { PageHeader } from "@/components/admin/page-header";
 import { StatusBadge } from "@/components/admin/status-badge";
 import { getAdminOrders } from "@/lib/admin-queries";
@@ -92,10 +93,18 @@ export default async function AdminOrdersPage({
                       })}
                     </TableCell>
                     <TableCell>
-                      {o.shipName}
-                      <span className="block text-xs text-muted-foreground">
-                        {o.shipCity} · {o.shipPhone}
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        <div>
+                          {o.shipName}
+                          <span className="block text-xs text-muted-foreground">
+                            {o.shipCity} · {o.shipPhone}
+                          </span>
+                        </div>
+                        <OrderWhatsApp
+                          phone={o.shipPhone}
+                          message={`Assalam o Alaikum ${o.shipName.trim().split(/\s+/)[0]}! Ladies Forest se raabta kar rahe hain. 🌸 Aap ka order *${o.orderNumber}* (Total: ${formatPKR(o.grandTotal)}, ${o.paymentMethod}) confirm karna hai. Kya ye order confirm hai? Baraye meharbani *YES* reply kar dein. Shukriya!`}
+                        />
+                      </div>
                     </TableCell>
                     <TableCell>
                       {o.items.reduce((s, i) => s + i.quantity, 0)}
